@@ -1,4 +1,4 @@
-# CS MIC v0.1.0 — Preview
+# CS MIC v0.1.0
 
 Local microphone cleanup and meme voice effects for Windows x64.
 
@@ -9,6 +9,8 @@ Local microphone cleanup and meme voice effects for Windows x64.
 
 Install VB-CABLE separately, send CS MIC to **CABLE Input**, and select **CABLE Output** in your voice app.
 
-**Preview limits:** unsigned installer; VB-CABLE-to-game routing and active Valorant/Vanguard gameplay remain unverified. 30 ms is a latency target, not a guarantee. Artwork rights are unverified and separate from the MIT code license.
+**Anti-cheat compatibility warning:** software and games with kernel-level anti-cheat, including Valorant with Vanguard, may block, interfere with, or flag virtual-audio routing or audio software. Active Valorant/Vanguard gameplay has not been tested; compatibility is not guaranteed. Follow game rules and do not bypass anti-cheat.
+
+30 ms is a latency target, not a guarantee. The installer is unsigned. Artwork rights are unverified and separate from the MIT code license.
 
 Download `setup.exe` and verify it against `SHA256SUMS.txt`. Source, build instructions and third-party notices are in the repository.

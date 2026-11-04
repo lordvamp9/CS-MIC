@@ -12,7 +12,7 @@
 
 ## Install
 
-1. Download **setup.exe** from [Releases](https://github.com/lordvamp9/CS-MIC/releases). Windows x64; Windows 10 22H2 or Windows 11 required. The .NET runtime is included. The preview installer is unsigned.
+1. Download **setup.exe** from [Releases](https://github.com/lordvamp9/CS-MIC/releases). Windows x64; Windows 10 22H2 or Windows 11 required. The .NET runtime is included. The installer is unsigned.
 2. Install [VB-CABLE separately from VB-Audio](https://vb-audio.com/Cable/) and restart if requested. No driver is included in CS MIC.
 3. Open CS MIC. Pick your physical microphone and **CABLE Input** as output. Press **Start**.
 4. Select **CABLE Output** as the microphone in Discord, Valorant, CS2 or League voice settings. Keep your headphones as their playback device. If a game only uses the Windows communications default, set CABLE Output there and restart the client.
@@ -60,7 +60,9 @@ See [validation results](docs/VALIDATION.md) for what was actually checked. `--d
 
 48 kHz mono, 480-sample blocks. **30 ms added latency is a goal, not a guarantee.** DSP time and queue depth shown in the app exclude Windows, VB-CABLE and the receiving app. Measure end-to-end delay on your hardware; instructions are in the validation document. Queues are bounded; a growing drop counter indicates audio falling behind.
 
-Uses NAudio 3.3.0 WASAPI compatibility APIs, which currently emit obsolescence warnings recommending the newer builders. No process inspection, memory access, injection, anti-cheat evasion or game integration. **Valorant/Vanguard compatibility is not guaranteed.**
+Uses NAudio 3.3.0 WASAPI compatibility APIs, which currently emit obsolescence warnings recommending the newer builders. CS MIC talks only to Windows audio endpoints; it does not inspect game processes, access game memory, inject code or hide itself.
+
+**Anti-cheat compatibility warning:** games with kernel-level anti-cheat, including Valorant with Riot Vanguard, may block, interfere with, or flag virtual-audio routing or audio software. CS MIC has not been tested with an active Vanguard game session. Compatibility is not guaranteed. Follow each game's rules and stop using CS MIC if its anti-cheat reports a conflict; do not try to bypass or evade anti-cheat.
 
 ## License
 
