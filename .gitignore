@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+.vs/
+native/build/
+native/*.zip
+*.user
+
+.work/
+.tools/
+artifacts/
+dist/

@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.20)
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+project(cs_mic_rnnoise C)
+add_library(rnnoise SHARED rnnoise/src/denoise.c rnnoise/src/rnn.c rnnoise/src/rnn_data.c rnnoise/src/pitch.c rnnoise/src/kiss_fft.c rnnoise/src/celt_lpc.c)
+target_include_directories(rnnoise PRIVATE rnnoise/include rnnoise/src)
+target_compile_definitions(rnnoise PRIVATE RNNOISE_BUILD DLL_EXPORT _USE_MATH_DEFINES)
+set_target_properties(rnnoise PROPERTIES C_STANDARD 99)

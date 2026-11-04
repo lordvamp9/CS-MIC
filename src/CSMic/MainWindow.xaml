@@ -1,0 +1,22 @@
+<Window x:Class="CSMic.MainWindow" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Title="{DynamicResource Title}" Width="840" Height="850" MinWidth="690" MinHeight="700" Background="#111118" Foreground="#F5F5FA" Icon="Assets/app.ico">
+<ScrollViewer VerticalScrollBarVisibility="Auto"><StackPanel Margin="28">
+ <DockPanel Margin="0,0,0,12"><TextBlock Text="Language / Idioma" DockPanel.Dock="Left" VerticalAlignment="Center"/><ComboBox x:Name="LanguagePicker" Width="150" HorizontalAlignment="Right" SelectionChanged="LanguageChanged"><ComboBoxItem Content="English"/><ComboBoxItem Content="Español"/></ComboBox></DockPanel>
+ <DockPanel><Border Width="92" Height="92" CornerRadius="12" Background="#252530" DockPanel.Dock="Left" Margin="0,0,22,0"><Image x:Name="Brand" Stretch="Uniform"/></Border><StackPanel><TextBlock Text="CS MIC" FontSize="36" FontWeight="Black" Foreground="#E9FF59"/><TextBlock Text="{DynamicResource Tagline}" Foreground="#F489BF"/><TextBlock Text="{DynamicResource Local}" Foreground="#AAAABB"/></StackPanel></DockPanel>
+ <TextBlock Text="{DynamicResource Connect}" FontWeight="Bold" Margin="0,22,0,8"/>
+ <TextBlock Text="{DynamicResource Microphone}"/><ComboBox x:Name="Input"/>
+ <TextBlock Text="{DynamicResource VirtualOutput}"/><ComboBox x:Name="Output"/>
+ <DockPanel><Button Content="{DynamicResource Refresh}" Click="RefreshClick"/><TextBlock Text="{DynamicResource GameHint}" VerticalAlignment="Center" Margin="12,0" Foreground="#E9FF59"/></DockPanel>
+ <TextBlock Text="{DynamicResource Character}" FontWeight="Bold" Margin="0,18,0,8"/>
+ <ComboBox x:Name="Profile" SelectedIndex="0" SelectionChanged="Changed"><ComboBoxItem Content="{DynamicResource Clean}"/><ComboBoxItem Content="{DynamicResource Meme}"/></ComboBox>
+ <TextBlock Text="{DynamicResource Intensity}"/><Slider x:Name="Intensity" Minimum="0" Maximum="1" Value="0.5" ValueChanged="Changed"/>
+ <TextBlock Text="{DynamicResource Noise}"/><Slider x:Name="Noise" Minimum="0" Maximum="1" Value="0.75" ValueChanged="Changed"/>
+ <CheckBox x:Name="Bypass" Content="{DynamicResource Bypass}" Foreground="#F489BF" Margin="0,12" Checked="Changed" Unchecked="Changed"/>
+ <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel Margin="0,0,12,0"><TextBlock Text="{DynamicResource Input}"/><ProgressBar x:Name="InputMeter" Maximum="1" Height="12" Foreground="#E9FF59"/></StackPanel><StackPanel Grid.Column="1"><TextBlock Text="{DynamicResource Output}"/><ProgressBar x:Name="OutputMeter" Maximum="1" Height="12" Foreground="#F489BF"/></StackPanel></Grid>
+ <TextBlock Text="{DynamicResource Transmit}" FontWeight="Bold" Margin="0,18,0,8"/>
+ <CheckBox x:Name="Listen" Content="{DynamicResource Listen}" Foreground="White" Margin="0,8"/>
+ <ComboBox x:Name="Monitor" ToolTip="{DynamicResource MonitorTip}"/>
+ <WrapPanel><Button x:Name="StartButton" Content="{DynamicResource Start}" Click="StartClick"/><Button x:Name="StopButton" Content="{DynamicResource Stop}" Click="StopClick" IsEnabled="False"/><Button Content="{DynamicResource Test}" Click="TestClick"/><Button Content="{DynamicResource Save}" Click="SaveClick"/></WrapPanel>
+ <TextBlock x:Name="Status" Text="{DynamicResource Ready}" TextWrapping="Wrap" Foreground="#E9FF59"/>
+ <TextBlock x:Name="Metrics" Text="{DynamicResource Target}" Foreground="#AAAABB" TextWrapping="Wrap"/>
+ <TextBlock Text="{DynamicResource Footer}" Foreground="#AAAABB" TextWrapping="Wrap" FontSize="11" Margin="0,12"/>
+</StackPanel></ScrollViewer></Window>
