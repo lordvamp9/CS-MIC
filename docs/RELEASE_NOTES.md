@@ -3,7 +3,8 @@
 Local microphone cleanup and meme voice effects for Windows x64.
 
 - English by default, with instant Spanish switching and saved language choice.
-- Clean / Russian meme profiles, adjustable intensity, RNNoise, bypass, meters and headphone monitoring.
+- Clean / Russian meme profiles, stronger adjustable saturation, RNNoise, bypass, percentage meters, headphone monitoring, and reduced speech clipping.
+- Closing the window keeps CS MIC in the notification area; use its right-click menu to reopen or exit.
 - Per-user `setup.exe` with the .NET 10 runtime included. No drivers bundled.
 - Native DSP and physical microphone capture checks passed. See the validation report for scope and installer results.
 
