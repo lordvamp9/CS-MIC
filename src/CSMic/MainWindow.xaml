@@ -8,10 +8,10 @@
  <DockPanel><Button Content="{DynamicResource Refresh}" Click="RefreshClick"/><TextBlock Text="{DynamicResource GameHint}" VerticalAlignment="Center" Margin="12,0" Foreground="#E9FF59"/></DockPanel>
  <TextBlock Text="{DynamicResource Character}" FontWeight="Bold" Margin="0,18,0,8"/>
  <ComboBox x:Name="Profile" SelectedIndex="0" SelectionChanged="Changed"><ComboBoxItem Content="{DynamicResource Clean}"/><ComboBoxItem Content="{DynamicResource Meme}"/></ComboBox>
- <TextBlock Text="{DynamicResource Intensity}"/><Slider x:Name="Intensity" Minimum="0" Maximum="1" Value="0.5" ValueChanged="Changed"/>
- <TextBlock Text="{DynamicResource Noise}"/><Slider x:Name="Noise" Minimum="0" Maximum="1" Value="0.75" ValueChanged="Changed"/>
+ <DockPanel><TextBlock Text="{DynamicResource Intensity}"/><TextBlock x:Name="IntensityPercent" Text="50 %" HorizontalAlignment="Right" Foreground="#E9FF59"/></DockPanel><Slider x:Name="Intensity" Minimum="0" Maximum="1" Value="0.5" ValueChanged="Changed"/>
+ <DockPanel><TextBlock Text="{DynamicResource Noise}"/><TextBlock x:Name="NoisePercent" Text="75 %" HorizontalAlignment="Right" Foreground="#E9FF59"/></DockPanel><Slider x:Name="Noise" Minimum="0" Maximum="1" Value="0.75" ValueChanged="Changed"/>
  <CheckBox x:Name="Bypass" Content="{DynamicResource Bypass}" Foreground="#F489BF" Margin="0,12" Checked="Changed" Unchecked="Changed"/>
- <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel Margin="0,0,12,0"><TextBlock Text="{DynamicResource Input}"/><ProgressBar x:Name="InputMeter" Maximum="1" Height="12" Foreground="#E9FF59"/></StackPanel><StackPanel Grid.Column="1"><TextBlock Text="{DynamicResource Output}"/><ProgressBar x:Name="OutputMeter" Maximum="1" Height="12" Foreground="#F489BF"/></StackPanel></Grid>
+ <Grid><Grid.ColumnDefinitions><ColumnDefinition/><ColumnDefinition/></Grid.ColumnDefinitions><StackPanel Margin="0,0,12,0"><DockPanel><TextBlock Text="{DynamicResource Input}"/><TextBlock x:Name="InputPercent" Text="0 %" HorizontalAlignment="Right"/></DockPanel><ProgressBar x:Name="InputMeter" Maximum="1" Height="12" Foreground="#E9FF59"/></StackPanel><StackPanel Grid.Column="1"><DockPanel><TextBlock Text="{DynamicResource Output}"/><TextBlock x:Name="OutputPercent" Text="0 %" HorizontalAlignment="Right"/></DockPanel><ProgressBar x:Name="OutputMeter" Maximum="1" Height="12" Foreground="#F489BF"/></StackPanel></Grid>
  <TextBlock Text="{DynamicResource Transmit}" FontWeight="Bold" Margin="0,18,0,8"/>
  <CheckBox x:Name="Listen" Content="{DynamicResource Listen}" Foreground="White" Margin="0,8"/>
  <ComboBox x:Name="Monitor" ToolTip="{DynamicResource MonitorTip}"/>

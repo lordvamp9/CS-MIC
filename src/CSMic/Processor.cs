@@ -10,33 +10,35 @@ public sealed class Processor : IDisposable {
  readonly BiQuadFilter high = BiQuadFilter.HighPassFilter(48000, 85, .707f);
  readonly BiQuadFilter presence = BiQuadFilter.PeakingEQ(48000, 1800, .8f, 4);
  readonly BiQuadFilter low = BiQuadFilter.LowPassFilter(48000, 6200, .707f);
- float envelope, gain=1, smoothIntensity;
+ float envelope, smoothIntensity, memePreamp=1;
  public volatile bool Bypass; public volatile bool Meme; public volatile float Intensity=.5f, Noise=.75f;
  public Processor() { state=rnnoise_create(); if(state==IntPtr.Zero) throw new InvalidOperationException(L10n.T("RnnoiseError")); }
  public void Process(float[] frame) {
   for(int i=0;i<480;i++) nativeIn[i]=frame[i]*32768;
   rnnoise_process_frame(state, clean, nativeIn);
   float rms=0; for(int i=0;i<480;i++) rms+=frame[i]*frame[i]; rms=MathF.Sqrt(rms/480);
-  // Gate never fully closes: slow release and 180 ms hold preserve quiet syllables.
-  if(rms>.008f) hold=18; else if(hold>0) hold--;
-  float target=hold>0 ? 1 : .3f + .7f*Math.Clamp(rms/.008f,0,1);
-  gain += (target-gain)*(target>gain?.8f:.045f);
+  float desiredPreamp=Math.Clamp(.05f/Math.Max(rms,.005f),1f,4f);
+  memePreamp+=(desiredPreamp-memePreamp)*.03f;
   for(int i=0;i<480;i++) {
    float dry=frame[i];
    float x=clean[i]/32768; // RNNoise introduces a frame of delay; partial wet mixes would comb-filter speech.
    // Noise slider blends attenuation against a one-frame delayed dry signal.
-   x=delayed[i]*(1-Noise)+x*Noise; delayed[i]=dry;
-   x=high.Transform(x)*gain;
+   // The delayed dry path always remains audible in meme mode. RNNoise can
+   // suppress quiet consonants; a hard gate would remove them completely.
+   float wet=Meme ? .55f+.3f*Math.Clamp(Noise,0,1) : .5f+.5f*Math.Clamp(Noise,0,1);
+   x=delayed[i]*(1-wet)+x*wet; delayed[i]=dry;
+   x=high.Transform(x);
    envelope=MathF.Max(MathF.Abs(x),envelope*.9995f);
-   if(envelope>.18f) x*=MathF.Pow(.18f/envelope,.67f);
+   if(!Meme && envelope>.18f) x*=MathF.Pow(.18f/envelope,.67f);
    smoothIntensity+=(Intensity-smoothIntensity)*.002f;
    float colored=low.Transform(presence.Transform(x));
-   float drive=1+smoothIntensity*24;
-   float saturated=MathF.Tanh(colored*drive)*.65f;
-   x=Meme ? x*(1-smoothIntensity)+saturated*smoothIntensity : x;
+   float drive=1+smoothIntensity*28;
+   float saturated=MathF.Tanh(colored*memePreamp*drive)*.94f;
+   float effectMix=Math.Clamp(smoothIntensity*1.5f,0,1);
+   x=Meme ? x*(1-effectMix)+saturated*effectMix : x;
    frame[i]=Math.Clamp(Bypass ? dry : x,-.95f,.95f);
   }
  }
- readonly float[] delayed=new float[480]; int hold;
+ readonly float[] delayed=new float[480];
  public void Dispose() => rnnoise_destroy(state);
 }

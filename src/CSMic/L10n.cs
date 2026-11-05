@@ -13,6 +13,7 @@ public static class L10n {
  public static string T(string key) => (Language=="es"?es:en).GetValueOrDefault(key,en.GetValueOrDefault(key,key));
  public static void Set(string language) {
   Language=language=="es"?"es":"en";
-  foreach(var pair in (Language=="es"?es:en)) Application.Current.Resources[pair.Key]=pair.Value;
+  foreach(var pair in (Language=="es"?es:en)) System.Windows.Application.Current.Resources[pair.Key]=pair.Value;
  }
 }
+

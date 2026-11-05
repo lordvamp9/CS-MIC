@@ -1,4 +1,5 @@
 using System.IO;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media.Imaging;
@@ -9,17 +10,31 @@ namespace CSMic;
 public partial class MainWindow : Window {
  readonly AudioEngine engine=new(); readonly DispatcherTimer meter=new(){Interval=TimeSpan.FromMilliseconds(50)};
  readonly DispatcherTimer animation=new(); readonly DispatcherTimer testTimer=new(){Interval=TimeSpan.FromSeconds(8)};
- GifBitmapDecoder? gif; int gifIndex; bool ready,running; Settings settings=Settings.Load();
+ GifBitmapDecoder? gif; int gifIndex; bool ready,running, exitRequested; Settings settings=Settings.Load();
+ readonly System.Windows.Forms.NotifyIcon tray = new();
+ readonly System.Windows.Forms.ToolStripMenuItem openMenu = new(), exitMenu = new();
  public MainWindow() {
-  L10n.Set(settings.Language); InitializeComponent(); LanguagePicker.SelectedIndex=L10n.Language=="es"?1:0; Refresh(); Profile.SelectedIndex=settings.Meme?1:0; Intensity.Value=settings.Intensity; Noise.Value=settings.Noise; ready=true;
+  L10n.Set(settings.Language); InitializeComponent(); LanguagePicker.SelectedIndex=L10n.Language=="es"?1:0; Refresh(); Profile.SelectedIndex=settings.Meme?1:0; Intensity.Value=settings.Intensity; Noise.Value=settings.Noise; ready=true;Changed(this,new RoutedEventArgs());
+  tray.Icon=System.Drawing.Icon.ExtractAssociatedIcon(Environment.ProcessPath!) ?? System.Drawing.SystemIcons.Application;
+  tray.Text="CS MIC";
+  tray.ContextMenuStrip=new System.Windows.Forms.ContextMenuStrip();
+  openMenu.Click+=(_,_)=>RestoreWindow(); exitMenu.Click+=(_,_)=>ExitApplication();
+  tray.ContextMenuStrip.Items.Add(openMenu); tray.ContextMenuStrip.Items.Add(exitMenu);
+  tray.MouseClick+=(_,e)=>{if(e.Button==System.Windows.Forms.MouseButtons.Left) Dispatcher.BeginInvoke(new Action(RestoreWindow));};
+  UpdateTrayLanguage(); tray.Visible=true;
   engine.Fault+=message=>Dispatcher.BeginInvoke(new Action(()=>{Stop();Status.Text=message;}));
-  meter.Tick+=(_,_)=>{ InputMeter.Value=engine.InputPeak;OutputMeter.Value=engine.OutputPeak;
+  meter.Tick+=(_,_)=>{
+   // A decibel display keeps quiet speech visible; this is signal level, not Windows gain.
+   double input=running?MeterValue(engine.InputPeak):0, output=running?MeterValue(engine.OutputPeak):0;
+   InputMeter.Value=input; OutputMeter.Value=output;
+   InputPercent.Text=$"{Math.Round(input*100)} %"; OutputPercent.Text=$"{Math.Round(output*100)} %";
    if(running) Metrics.Text=string.Format(L10n.T("Metrics"),engine.DspMs,engine.QueueMs,engine.Dropped);
   }; meter.Start();
-  using(var stream=Application.GetResourceStream(new Uri("pack://application:,,,/Assets/brand.gif"))!.Stream) gif=new GifBitmapDecoder(stream,BitmapCreateOptions.PreservePixelFormat,BitmapCacheOption.OnLoad);
+  using(var stream=System.Windows.Application.GetResourceStream(new Uri("pack://application:,,,/Assets/brand.gif"))!.Stream) gif=new GifBitmapDecoder(stream,BitmapCreateOptions.PreservePixelFormat,BitmapCacheOption.OnLoad);
   animation.Tick+=(_,_)=>ShowFrame(); ShowFrame(); animation.Start();
   testTimer.Tick+=(_,_)=>{Stop();Status.Text=L10n.T("TestDone");};
-  Closing+=(_,_)=>{animation.Stop();meter.Stop();testTimer.Stop();engine.Dispose();};
+  Closing+=OnClosing;
+  Closed+=(_,_)=>{animation.Stop();meter.Stop();testTimer.Stop();engine.Dispose();tray.Visible=false;tray.Dispose();};
  }
  BitmapSource? composite,restore; Rect lastRect; int lastDisposal;
  static int Meta(BitmapFrame f,string query,int fallback=0) {try {return f.Metadata is BitmapMetadata m && m.ContainsQuery(query) ? Convert.ToInt32(m.GetQuery(query)) : fallback;}catch{return fallback;}}
@@ -43,6 +58,7 @@ public partial class MainWindow : Window {
   lastDisposal=Meta(f,"/grctlext/Disposal");
   animation.Interval=TimeSpan.FromMilliseconds(Math.Max(20,Meta(f,"/grctlext/Delay",10)*10));gifIndex=(gifIndex+1)%gif.Frames.Count;
  }
+ static double MeterValue(float peak)=>peak<.001f?0:Math.Clamp((20*Math.Log10(peak)+60)/60,0,1);
  void Refresh() {
   try {var ins=engine.List(DataFlow.Capture);var outs=engine.List(DataFlow.Render);
    Input.ItemsSource=ins; Output.ItemsSource=outs;Monitor.ItemsSource=outs;
@@ -51,15 +67,19 @@ public partial class MainWindow : Window {
    Monitor.SelectedItem=outs.Find(x=>x.Id==settings.MonitorId) ?? outs.Find(x=>!x.Name.Contains("CABLE",StringComparison.OrdinalIgnoreCase));
   } catch(Exception e) {Status.Text=L10n.T("EnumerateError")+e.Message;}
  }
+ void UpdateTrayLanguage() {openMenu.Text=L10n.Language=="es"?"Abrir CS MIC":"Open CS MIC"; exitMenu.Text=L10n.Language=="es"?"Salir":"Exit";}
+ void RestoreWindow() {Show();WindowState=WindowState.Normal;ShowInTaskbar=true;Activate();}
+ void ExitApplication() {exitRequested=true;Close();}
+ void OnClosing(object? sender,CancelEventArgs e) {if(exitRequested) return;e.Cancel=true;Hide();ShowInTaskbar=false;}
  void LanguageChanged(object sender,SelectionChangedEventArgs e) {
   if(!ready) return;
-  L10n.Set(LanguagePicker.SelectedIndex==1?"es":"en");
+  L10n.Set(LanguagePicker.SelectedIndex==1?"es":"en"); UpdateTrayLanguage();
   Status.Text=L10n.T(running?"Streaming":"Ready"); Metrics.Text=L10n.T("Target");
   settings=settings with {Language=L10n.Language};
   try {settings.Save();} catch(Exception ex) {Status.Text=L10n.T("SaveError")+ex.Message;}
  }
  void RefreshClick(object sender,RoutedEventArgs e) {if(!running) Refresh();}
- void Changed(object sender,RoutedEventArgs e) {if(!ready) return; if(engine.Processor is {} p) {p.Meme=Profile.SelectedIndex==1;p.Intensity=(float)Intensity.Value;p.Noise=(float)Noise.Value;p.Bypass=Bypass.IsChecked==true;}}
+ void Changed(object sender,RoutedEventArgs e) {if(!ready) return; IntensityPercent.Text=$"{Math.Round(Intensity.Value*100)} %"; NoisePercent.Text=$"{Math.Round(Noise.Value*100)} %"; if(engine.Processor is {} p) {p.Meme=Profile.SelectedIndex==1;p.Intensity=(float)Intensity.Value;p.Noise=(float)Noise.Value;p.Bypass=Bypass.IsChecked==true;}}
  void Start(bool test) {
   if(running) Stop();
   if(Input.SelectedItem is not Endpoint input || Output.SelectedItem is not Endpoint output) {Status.Text="Selecciona un micrÃ³fono y CABLE Input. Actualiza la lista tras instalar VB-CABLE.";return;}
